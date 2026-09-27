@@ -127,7 +127,7 @@ python3 smoke-test.py
 ## 项目地址
 
 - GitHub: https://github.com/fn199544123/cockpit-fde-11-asset-inventory
-- 码云: https://gitee.com/xiwenfde/cockpit-fde-11-asset-inventory.git
+- 码云: https://gitee.com/xiwenfde/cockpit-fde-11-asset-inventory
 
 ## 许可证
 
