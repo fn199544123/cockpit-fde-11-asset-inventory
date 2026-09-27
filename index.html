@@ -4,14 +4,80 @@
 </style></head><body>
 <header><div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z M3 8v9l9 5 9-5V8 M12 13v9"/></svg></span>资产盘点工作台</div><div class="identity"><span class="muted">某企业 · 固定资产管理</span><span class="badge">douyin</span></div></header>
 <main><section class="hero"><div><span class="eyebrow">ASSET INVENTORY / 演示工作台</span><h1>每一件资产，都有据可查</h1><p>登记台账，核对实物，让账实差异与楼层分布一目了然。</p></div><button id="add">＋ 登记资产</button></section>
-<div class="notice"><span>演示数据·仅当前浏览器保存</span><span>虚构编号 · 模拟扫码 · 无硬件或多用户后台接入</span></div><div id="storageError" class="hidden" role="alert"></div>
+<div class="notice"><span>演示数据·服务端数据库保存</span><span>虚构编号 · 模拟扫码 · 服务端共享数据 · 未接真实扫码硬件</span></div><div id="storageError" class="hidden" role="alert"></div>
 <section class="stats"><div class="card"><span class="label">台账总数量</span><strong class="metric" id="total">0</strong><span class="muted" id="records"></span></div><div class="card"><span class="label">已登记实盘</span><strong class="metric blue" id="actual">0</strong><span class="muted" id="progress"></span></div><div class="card"><span class="label">存在差异</span><strong class="metric orange" id="diff">0</strong><span class="muted" id="diffDetail"></span></div><div class="card"><span class="label">待盘点资产</span><strong class="metric" id="pending">0</strong><span class="muted">未盘点不计入盘盈盘亏</span></div></section>
 <div class="split"><section class="card"><div class="section-head"><h2>资产分布</h2><span class="muted">全量台账 · 按楼层统计</span></div><div id="floors"></div><p class="hint">蓝色条表示台账数量；实盘仅汇总已登记记录。</p></section><section class="card"><h2>扫码盘点</h2><p class="muted">编号输入模拟扫码，不调用摄像头或扫码硬件。</p><form id="scanForm" class="scanform"><input id="scanCode" aria-label="模拟扫码资产编号" placeholder="输入虚构编号，如 XN-1001" required maxlength="24"><button class="primary">查找资产</button></form><div id="scanError" class="error" role="alert"></div><p class="hint">录入实盘总数量即覆盖上次结果，不会重复累加。</p></section></div>
 <section class="card"><div class="section-head"><div><h2>资产台账与差异</h2><span class="muted">差异 = 实盘数量 − 台账数量；筛选仅影响下方列表与导出</span></div><button id="export">导出筛选结果 CSV</button></div><div class="toolbar"><input id="search" aria-label="搜索资产" placeholder="搜索虚构编号或资产名称"><select id="floorFilter" aria-label="筛选楼层"><option value="">全部楼层</option><option>一楼</option><option>二楼</option><option>三楼</option></select><select id="statusFilter" aria-label="筛选盘点状态"><option value="">全部状态</option><option>待盘点</option><option>账实一致</option><option>盘盈</option><option>盘亏</option></select></div><div class="table-wrap"><table><thead><tr><th>资产 / 虚构编号</th><th>分类</th><th>楼层</th><th>台账数量</th><th>实盘数量</th><th>差异</th><th>盘点状态</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div><div class="foot"><span class="muted" id="count"></span><div class="pagination"><button id="prev">上一页</button><span id="pageText" class="muted"></span><button id="next">下一页</button></div></div></section><footer>某企业 · 虚构资产演示　 <button id="reset">重置演示数据</button></footer></main>
 <dialog id="assetDialog"><form id="assetForm"><h2 id="assetTitle">登记资产</h2><div class="fields"><label class="full">虚构资产编号<input id="code" required pattern="XN-[A-Za-z0-9-]+" maxlength="24" placeholder="XN-2001"><span class="hint">以 XN- 开头，只含字母、数字和连字符</span></label><label class="full">资产名称<input id="assetName" required maxlength="40" placeholder="如：演示显示器（勿填真实资料）"></label><label>资产分类<select id="category"><option>电子设备</option><option>教学设备</option><option>办公家具</option><option>其他资产</option></select></label><label>所在楼层<select id="floor"><option>一楼</option><option>二楼</option><option>三楼</option></select></label><label class="full">台账数量<input id="book" type="number" min="1" max="999999" step="1" required value="1"></label></div><p class="hint">仅填写脱敏演示信息。修改楼层、台账数量后，统计与差异自动更新。</p><div id="assetError" class="error" role="alert"></div><div class="actions"><button type="button" data-close="assetDialog">取消</button><button class="primary">保存资产</button></div></form></dialog>
 <dialog id="countDialog"><form id="countForm"><h2>登记实盘数量</h2><div id="countSummary" class="summary"></div><label>实盘总数量<input id="quantity" type="number" min="0" max="999999" step="1" required></label><p class="hint">未找到实物请填 0；此次登记替换该资产之前的实盘数量。</p><div id="countError" class="error" role="alert"></div><div class="actions"><button type="button" data-close="countDialog">取消</button><button class="primary">保存盘点</button></div></form></dialog>
 <dialog id="resetDialog"><h2>重置演示数据？</h2><p>当前浏览器中新增的资产和盘点结果将被清除，恢复初始虚构数据。建议先导出 CSV 留存。</p><div class="actions"><button data-close="resetDialog">取消</button><button id="confirmReset" class="primary">确认重置</button></div></dialog><div id="toast" class="toast hidden" role="status"></div>
-<script>
+<script>// Embedded in each application. No localStorage business persistence or fallback.
+const backend = (() => {
+  let revision = null, initial = true, reset = false, busy = false, failed = false;
+  let seedData;
+  const endpoint = new URL('api/state', location.href.replace(/index\.html(?:\?.*)?$/, ''));
+  function failure(message) {
+    failed = true;
+    document.body.inert = true;
+    let box = document.getElementById('backend-failure');
+    if (!box) {
+      box = document.createElement('dialog'); box.id = 'backend-failure';
+      document.documentElement.append(box);
+    }
+    box.replaceChildren();
+    const title = document.createElement('h2'); title.textContent = '数据未保存';
+    const detail = document.createElement('p'); detail.textContent = message;
+    const button = document.createElement('button'); button.textContent = '刷新并读取服务器数据';
+    button.onclick = () => location.reload();
+    box.append(title, detail, button); if (!box.open) box.showModal();
+  }
+  async function request(options) {
+    try {
+      const response = await fetch(endpoint, {credentials: 'same-origin', cache: 'no-store', ...options});
+      if (!response.ok) {
+        let message = '服务器不可用或当前账号没有操作权限。';
+        try { message = (await response.json()).error || message; } catch (_) {}
+        throw Error(message);
+      }
+      return await response.json();
+    } catch (error) {
+      failure(error.message || '请求失败，请刷新核对服务器数据。');
+      throw error;
+    }
+  }
+  return {
+    async load() {
+      const result = await request(); revision = result.revision; seedData = result.seed;
+      return JSON.stringify(result.data);
+    },
+    seed() {
+      if (!initial) reset = true;
+      return structuredClone(seedData);
+    },
+    ready() { initial = false; window.backendReady = true; document.documentElement.dataset.backendReady = 'true'; },
+    async save(data) {
+      if (failed || busy || revision === null) throw Error('请等待保存完成或刷新后重试');
+      busy = true; document.body.inert = true;
+      try {
+        const csrf = document.cookie.split('; ').find(x => x.startsWith('csrftoken='))?.slice(10) || '';
+        const result = await request({method: 'POST', headers: {
+          'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf
+        }, body: JSON.stringify({revision, action: reset ? 'reset' : 'save', data,
+          context: {product: document.getElementById('shipProduct')?.value, room: document.getElementById('shipRoom')?.value}})});
+        revision = result.revision; reset = false;
+      } finally {
+        busy = false;
+        if (!failed) document.body.inert = false;
+      }
+    },
+    failure
+  };
+})();
+window.addEventListener('unhandledrejection', event => { backend.failure(event.reason?.message || '操作失败，请刷新核对'); event.preventDefault(); });
+
+(async () => {
+const backendInitial = await backend.load();
+
 'use strict';
 const KEY='development-11-assets-v1',FLOORS=['一楼','二楼','三楼'],CATEGORIES=['电子设备','教学设备','办公家具','其他资产'];
 const $=id=>document.getElementById(id);const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -20,8 +86,8 @@ let assets=[],editCode=null,countCode=null,page=1,timer,storageBlocked=false;con
 const validQty=(v,min)=>Number.isInteger(v)&&v>=min&&v<=999999;
 function validData(a){return Array.isArray(a)&&a.every(x=>x&&typeof x.code==='string'&&/^XN-[A-Za-z0-9-]+$/.test(x.code)&&x.code.length<=24&&typeof x.name==='string'&&x.name.trim()&&x.name.length<=40&&FLOORS.includes(x.floor)&&CATEGORIES.includes(x.category)&&validQty(x.book,1)&&(x.actual===null||validQty(x.actual,0))&&typeof x.updated==='string')&&new Set(a.map(x=>x.code)).size===a.length}
 function storageError(msg){$('storageError').textContent=msg;$('storageError').classList.remove('hidden')}
-function load(){try{const raw=localStorage.getItem(KEY);if(raw!==null){const data=JSON.parse(raw);if(!validData(data))throw Error();assets=data}else{assets=seed();localStorage.setItem(KEY,JSON.stringify(assets))}}catch(e){storageBlocked=true;assets=seed();storageError('浏览器保存不可用或已有数据损坏。当前显示初始示例；为避免覆盖原数据，保存已暂停。可确认重置后重试。')}}
-function commit(next,reset=false){if(storageBlocked&&!reset){toast('保存已暂停，请先处理顶部存储提示');return false}try{localStorage.setItem(KEY,JSON.stringify(next));assets=next;storageBlocked=false;$('storageError').classList.add('hidden');render();return true}catch(e){storageError('保存失败：浏览器存储不可用或空间不足。本次修改未保存，请导出现有数据。');return false}}
+async function load(){try{const raw=backendInitial;if(raw!==null){const data=JSON.parse(raw);if(!validData(data))throw Error();assets=data}else{assets=backend.seed();(await backend.save(assets))}}catch(e){storageBlocked=true;assets=backend.seed();storageError('浏览器保存不可用或已有数据损坏。当前显示初始示例；为避免覆盖原数据，保存已暂停。可确认重置后重试。')}}
+async function commit(next,reset=false){if(storageBlocked&&!reset){toast('保存已暂停，请先处理顶部存储提示');return false}try{(await backend.save(next));assets=next;storageBlocked=false;$('storageError').classList.add('hidden');render();return true}catch(e){storageError('保存失败：服务器不可用或数据校验失败。本次修改未保存，请导出现有数据。');return false}}
 function status(a){return a.actual===null?'待盘点':a.actual===a.book?'账实一致':a.actual>a.book?'盘盈':'盘亏'}
 function filtered(){const q=$('search').value.trim().toLowerCase();return assets.filter(a=>(!q||a.code.toLowerCase().includes(q)||a.name.toLowerCase().includes(q))&&(!$('floorFilter').value||a.floor===$('floorFilter').value)&&(!$('statusFilter').value||status(a)===$('statusFilter').value))}
 const sum=(arr,key)=>arr.reduce((s,a)=>s+(a[key]??0),0);
@@ -32,10 +98,14 @@ function toast(s){clearTimeout(timer);$('toast').textContent=s;$('toast').classL
 function openAsset(code=null){editCode=code;const a=assets.find(a=>a.code===code);$('assetForm').reset();$('assetError').textContent='';$('assetTitle').textContent=a?'修改资产':'登记资产';$('code').disabled=!!a;if(a){$('code').value=a.code;$('assetName').value=a.name;$('category').value=a.category;$('floor').value=a.floor;$('book').value=a.book}$('assetDialog').showModal()}
 function openCount(code){const a=assets.find(a=>a.code===code);countCode=code;$('countError').textContent='';$('countSummary').innerHTML=`<strong>${esc(a.name)}</strong><br>${esc(a.code)} · ${a.floor} · 台账 ${a.book}<br><span class="muted">上次实盘：${a.actual??'未盘点'}${a.updated?' · '+esc(a.updated):''}</span>`;$('quantity').value=a.actual??'';$('countDialog').showModal();$('quantity').focus()}
 $('add').onclick=()=>openAsset();$('rows').onclick=e=>{const b=e.target.closest('button');if(b?.dataset.edit)openAsset(b.dataset.edit);if(b?.dataset.count)openCount(b.dataset.count)};
-$('assetForm').onsubmit=e=>{e.preventDefault();const code=$('code').value.trim().toUpperCase(),name=$('assetName').value.trim(),book=Number($('book').value);if(!/^XN-[A-Z0-9-]+$/.test(code)||!name||!validQty(book,1)){ $('assetError').textContent='请填写有效的虚构编号、资产名称和整数数量';return}if(!editCode&&assets.some(a=>a.code===code)){$('assetError').textContent='该虚构编号已存在，请使用其他编号';return}const original=assets.find(a=>a.code===editCode),a={code,name,book,category:$('category').value,floor:$('floor').value,actual:original?.actual??null,updated:original?.updated??''};const next=editCode?assets.map(x=>x.code===editCode?a:x):[a,...assets];if(commit(next)){page=1;render();$('assetDialog').close();toast('资产已保存，统计已更新')}};
+$('assetForm').onsubmit=async e=>{e.preventDefault();const code=$('code').value.trim().toUpperCase(),name=$('assetName').value.trim(),book=Number($('book').value);if(!/^XN-[A-Z0-9-]+$/.test(code)||!name||!validQty(book,1)){ $('assetError').textContent='请填写有效的虚构编号、资产名称和整数数量';return}if(!editCode&&assets.some(a=>a.code===code)){$('assetError').textContent='该虚构编号已存在，请使用其他编号';return}const original=assets.find(a=>a.code===editCode),a={code,name,book,category:$('category').value,floor:$('floor').value,actual:original?.actual??null,updated:original?.updated??''};const next=editCode?assets.map(x=>x.code===editCode?a:x):[a,...assets];if((await commit(next))){page=1;render();$('assetDialog').close();toast('资产已保存，统计已更新')}};
 $('scanForm').onsubmit=e=>{e.preventDefault();const code=$('scanCode').value.trim().toUpperCase();$('scanError').textContent='';if(!assets.some(a=>a.code===code)){$('scanError').textContent='未找到该虚构编号，请先登记资产';return}openCount(code)};
-$('countForm').onsubmit=e=>{e.preventDefault();const n=Number($('quantity').value);if($('quantity').value===''||!validQty(n,0)){$('countError').textContent='请输入 0 至 999999 的整数';return}if(commit(assets.map(a=>a.code===countCode?{...a,actual:n,updated:new Date().toLocaleString('zh-CN')}:a))){$('countDialog').close();toast('盘点已保存，差异与分布已同步')}};
-for(const id of ['search','floorFilter','statusFilter'])$(id).addEventListener('input',()=>{page=1;render()});$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());$('reset').onclick=()=>$('resetDialog').showModal();$('confirmReset').onclick=()=>{if(commit(seed(),true)){$('search').value='';$('floorFilter').value='';$('statusFilter').value='';page=1;render();$('resetDialog').close();toast('已恢复初始演示数据')}};
+$('countForm').onsubmit=async e=>{e.preventDefault();const n=Number($('quantity').value);if($('quantity').value===''||!validQty(n,0)){$('countError').textContent='请输入 0 至 999999 的整数';return}if((await commit(assets.map(a=>a.code===countCode?{...a,actual:n,updated:new Date().toLocaleString('zh-CN')}:a)))){$('countDialog').close();toast('盘点已保存，差异与分布已同步')}};
+for(const id of ['search','floorFilter','statusFilter'])$(id).addEventListener('input',()=>{page=1;render()});$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());$('reset').onclick=()=>$('resetDialog').showModal();$('confirmReset').onclick=async ()=>{if((await commit(backend.seed(),true))){$('search').value='';$('floorFilter').value='';$('statusFilter').value='';page=1;render();$('resetDialog').close();toast('已恢复初始演示数据')}};
 function csvCell(v){let s=String(v??'');if(/^[\s]*[=+\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
-$('export').onclick=()=>{const aa=filtered(),rows=[['虚构编号','资产名称','分类','楼层','台账数量','实盘数量','差异','状态','盘点时间'],...aa.map(a=>[a.code,a.name,a.category,a.floor,a.book,a.actual,a.actual===null?'':a.actual-a.book,status(a),a.updated])];const blob=new Blob(['\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='某企业-虚构资产盘点.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(`已导出 ${aa.length} 条筛选结果`)};load();render();
+$('export').onclick=()=>{const aa=filtered(),rows=[['虚构编号','资产名称','分类','楼层','台账数量','实盘数量','差异','状态','盘点时间'],...aa.map(a=>[a.code,a.name,a.category,a.floor,a.book,a.actual,a.actual===null?'':a.actual-a.book,status(a),a.updated])];const blob=new Blob(['\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='某企业-虚构资产盘点.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(`已导出 ${aa.length} 条筛选结果`)};(await load());render();
+
+
+backend.ready();
+})().catch(error=>backend.failure(error.message));
 </script></body></html>

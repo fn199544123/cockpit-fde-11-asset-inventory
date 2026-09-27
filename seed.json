@@ -1,0 +1,56 @@
+[
+  {
+    "code": "XN-1001",
+    "name": "演示计算机",
+    "category": "电子设备",
+    "floor": "一楼",
+    "book": 24,
+    "actual": 23,
+    "updated": ""
+  },
+  {
+    "code": "XN-1002",
+    "name": "演示投影仪",
+    "category": "教学设备",
+    "floor": "一楼",
+    "book": 8,
+    "actual": 8,
+    "updated": ""
+  },
+  {
+    "code": "XN-1003",
+    "name": "演示实验设备",
+    "category": "教学设备",
+    "floor": "二楼",
+    "book": 16,
+    "actual": null,
+    "updated": ""
+  },
+  {
+    "code": "XN-1004",
+    "name": "演示课桌",
+    "category": "办公家具",
+    "floor": "二楼",
+    "book": 40,
+    "actual": 42,
+    "updated": ""
+  },
+  {
+    "code": "XN-1005",
+    "name": "演示显示器",
+    "category": "电子设备",
+    "floor": "三楼",
+    "book": 12,
+    "actual": null,
+    "updated": ""
+  },
+  {
+    "code": "XN-1006",
+    "name": "演示文件柜",
+    "category": "办公家具",
+    "floor": "三楼",
+    "book": 10,
+    "actual": 10,
+    "updated": ""
+  }
+]
